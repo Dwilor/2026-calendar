@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Universe Glow - Star Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <svg style="display:none;">
+      <filter id="noise">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
+        <feColorMatrix type="saturate" values="0" />
+      </filter>
+    </svg>
+
+    <div class="space-bg">
+        <div class="grain"></div>
+    </div>
+    
+    <div id="star-container"></div>
+    
+    <div class="back" id="backBtn" onclick="back()"></div>
+
+    <div id="stage">
+        <div class="layer active" id="view-year">
+            <h1 class="year-big" onclick="nav('months', buildMonths)">2026</h1>
+        </div>
+
+        <div class="layer" id="view-months">
+            <div class="header-main">2026</div>
+            <div id="monthsGrid" class="months-grid"></div>
+        </div>
+
+        <div class="layer" id="view-month">
+            <div id="monthViewWrapper" class="full-w-flex"></div>
+        </div>
+
+        <div class="layer" id="view-day">
+            <div id="day-header" class="header-main"></div>
+            <div class="mood-selector" id="moodSelector"></div>
+            <div id="taskContainer" class="task-list"></div>
+        </div>
+    </div>
+
+    <div class="bottom-bar" id="addTaskBtn" onclick="openModal(true)">Ajouter une tâche</div>
+    <div class="bottom-bar" id="settingsBtn" onclick="openSettings()">Réglages</div>
+
+    <div class="modal" id="taskModal">
+        <div class="modal-card">
+            <div class="modal-title">Nouvelle tâche</div>
+            <input type="text" id="modalTaskInput" class="custom-input" placeholder="Que voulez-vous faire ?">
+            <div class="time-row">
+                <span>Heure :</span>
+                <input type="time" id="modalTimeInput" class="time-picker" value="12:00">
+            </div>
+            <div id="catChoice" class="cat-grid"></div>
+            <div class="modal-actions">
+                <button onclick="closeModal()" class="btn-secondary">Annuler</button>
+                <button onclick="saveNewTask()" class="btn-primary">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="settingsModal">
+        <div class="modal-card">
+            <div class="modal-title">Réglages</div>
+            <div id="catSettingsList"></div>
+            <div class="settings-actions">
+                <button onclick="exportData()" class="btn-secondary" style="font-size: 11px;">Exporter JSON</button>
+                <button onclick="importData()" class="btn-secondary" style="font-size: 11px;">Importer JSON</button>
+            </div>
+            <button onclick="closeSettings()" class="btn-secondary full-w" style="margin-top: 15px; background: rgba(255,255,255,0.15);">Fermer</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
