@@ -113,19 +113,12 @@ function buildMonth() {
 function buildDay() {
     document.getElementById("day-header").textContent = curD + " " + monthNames[curM];
     const ms = document.getElementById("moodSelector"); ms.innerHTML = "";
-    ms.style.overflow = "visible"; 
-    ms.style.webkitMaskImage = "none"; 
     MOODS_CFG.forEach(m => {
         const b = document.createElement("span");
         b.className = `mood-btn ${m.c==='transparent'?'off':''} ${MOODS[`${YEAR}-${curM}-${curD}`]===m.c?'active':''}`;
         b.style.backgroundColor = m.c; 
         if(m.c==='transparent') b.textContent="×";
-        b.onclick = (e) => { 
-            e.preventDefault();
-            MOODS[`${YEAR}-${curM}-${curD}`] = m.c; 
-            localStorage.setItem(KEY+"-m", JSON.stringify(MOODS)); 
-            buildDay(); updateStars(); 
-        };
+        b.onclick = () => { MOODS[`${YEAR}-${curM}-${curD}`] = m.c; localStorage.setItem(KEY+"-m", JSON.stringify(MOODS)); buildDay(); updateStars(); };
         ms.appendChild(b);
     });
     renderTasks();
@@ -202,6 +195,7 @@ function importData() {
     };
     input.click();
 }
+
 // --- Logique de Swipe Back Tactile ---
 let touchStartX = 0;
 let touchEndX = 0;
@@ -216,22 +210,10 @@ document.addEventListener('touchend', e => {
 }, {passive: true});
 
 function handleSwipe() {
-    // Si on glisse de la gauche vers la droite de plus de 100px
-    // Et que le point de départ est sur le bord gauche de l'écran (0-50px)
+    // Si glisse de gauche à droite (>100px) et part du bord gauche (<50px)
     if (touchEndX - touchStartX > 100 && touchStartX < 50) {
-        if (stack.length > 1) {
-            back();
-        }
+        if (stack.length > 1) back();
     }
-}
-
-// Assure-toi que la fonction back() est bien celle-ci (inchangée) :
-function back() {
-    if (stack.length <= 1) return;
-    const from = stack.pop();
-    document.getElementById("view-"+from).classList.remove("active");
-    document.getElementById("view-"+stack[stack.length-1]).classList.add("active");
-    updateUI();
 }
 
 updateUI();

@@ -14,12 +14,11 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: var(-
 
 .space-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: #000; }
 
-/* Grain fin et immobile */
 .grain { 
     position: absolute; 
     inset: 0; 
     filter: url(#noise); 
-    opacity: 0.14; /* Grain plus visible sur mobile */
+    opacity: 0.14; /* Grain plus présent */
     mix-blend-mode: overlay; 
     pointer-events: none; 
 }
@@ -35,14 +34,8 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: var(-
 .header-main { font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #00D2FF, #9D50BB, #F21B6A); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: gradientText 8s ease infinite; width: 100%; }
 .year-big { font-size: 26vw; font-weight: 900; cursor: pointer; text-align: center; margin: 0; width: 100%; pointer-events: auto; background: linear-gradient(135deg, #00D2FF, #9D50BB, #F21B6A); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: gradientText 8s ease infinite; }
 
-.months-grid { 
-    display: grid; 
-    grid-template-columns: repeat(3, 1fr); 
-    gap: 12px 10px; /* Réduit de 20px à 12px pour l'espace entre les lignes */
-    width: 100%; 
-    max-width: 500px; 
-}
-
+/* Grille des mois optimisée */
+.months-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 10px; width: 100%; max-width: 500px; }
 .month-item { text-align: center; font-size: 1.3rem; font-weight: 500; cursor: pointer; padding: 15px 0; }
 @media (max-width: 600px) { .months-grid { grid-template-columns: repeat(2, 1fr); } }
 
@@ -53,9 +46,9 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: var(-
 .dots { display: flex; gap: 3px; justify-content: center; margin-top: 6px; height: 5px; }
 .dot { width: 5px; height: 5px; border-radius: 50%; }
 
-.mood-selector { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 30px; position: relative; padding: 30px 0; overflow: visible !important; width: 100%; }
-.mood-btn { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; transition: transform 0.4s ease, opacity 0.4s ease, filter 0.4s ease; filter: blur(10px); opacity: 0.4; border: none; -webkit-tap-highlight-color: transparent; user-select: none; will-change: transform, filter; transform: translateZ(0); backface-visibility: hidden; }
-.mood-btn.active { transform: scale(1.4) translateZ(0); filter: blur(8px); opacity: 1; border: 2px solid white !important; }
+.mood-selector { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 30px; position: relative; padding: 30px 0; width: 100%; }
+.mood-btn { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; transition: 0.4s; filter: blur(10px); opacity: 0.4; border: none; }
+.mood-btn.active { transform: scale(1.4); filter: blur(8px); opacity: 1; border: 2px solid white !important; }
 .mood-btn.off { filter: none; opacity: 0.4; border: 1px solid rgba(255,255,255,0.2); background: transparent !important; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; }
 
 .task-list { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 10px; margin-top: 45px; }
@@ -66,10 +59,10 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: var(-
 .task-cat-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 12px; }
 .task-del { color: #ff453a; font-size: 20px; opacity: 0.3; cursor: pointer; text-align: right; }
 
-.bottom-bar { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: white; color: black; padding: 16px 35px; border-radius: 35px; font-weight: 700; font-size: 15px; cursor: pointer; z-index: 2000; box-shadow: 0 10px 40px rgba(0,0,0,0.6); display: none; white-space: nowrap; }
+.bottom-bar { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: white; color: black; padding: 16px 35px; border-radius: 35px; font-weight: 700; font-size: 15px; cursor: pointer; z-index: 2000; display: none; white-space: nowrap; }
 .bottom-bar.visible { display: block; animation: slideUp 0.5s cubic-bezier(0.2, 0, 0.2, 1); }
 
-.back { position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 20px; z-index: 5000; padding: 12px 20px; background: rgba(30,30,30,0.5); backdrop-filter: blur(20px); border-radius: 20px; visibility: hidden; opacity: 0; transition: 0.4s; font-weight: 600; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; pointer-events: auto; }
+.back { position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 20px; z-index: 5000; padding: 12px 20px; background: rgba(30,30,30,0.5); backdrop-filter: blur(20px); border-radius: 20px; visibility: hidden; opacity: 0; transition: 0.4s; font-weight: 600; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
 .back.visible { visibility: visible; opacity: 1; }
 
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); display: none; align-items: center; justify-content: center; z-index: 10000; padding: 20px; }
