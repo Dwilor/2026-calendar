@@ -26,7 +26,18 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: var(-
 
 #star-container { position: absolute; inset: -15%; z-index: 1; pointer-events: none; }
 
-.mood-star { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0; transition: all 1.8s cubic-bezier(0.4, 0, 0.2, 1); animation: starFloat 60s infinite ease-in-out; mix-blend-mode: screen; pointer-events: none; will-change: transform, width, height, opacity; }
+.mood-star { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0; transition: all 1.8s cubic-bezier(0.4, 0, 0.2, 1); animation: starFloat 60s infinite ease-in-out; mix-blend-mode: screen; pointer-events: none; will-change: transform, width, height, opacity, box-shadow; }
+
+.mood-star::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    filter: url(#noise);
+    opacity: 0.4;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+}
 
 #stage { position: relative; width: 100vw; height: 100vh; z-index: 10; pointer-events: none; }
 .layer { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; visibility: hidden; pointer-events: none; transform: scale(0.95); filter: blur(10px); transition: all 0.6s cubic-bezier(0.2, 0, 0.2, 1); overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px; padding-top: calc(60px + env(safe-area-inset-top)); padding-bottom: 120px; }
@@ -37,7 +48,12 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: var(-
 
 .months-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px 10px; width: 100%; max-width: 500px; }
 .month-item { text-align: center; font-size: 1.3rem; font-weight: 500; cursor: pointer; padding: 15px 0; }
-@media (max-width: 600px) { .months-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { 
+    .months-grid { 
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 10px 10px; /* Réduit de 20px à 10px en hauteur */
+    } 
+}
 
 .month-view-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; width: 100%; max-width: 500px; }
 .weekday { font-size: 0.7rem; color: rgba(255,255,255,0.3); font-weight: 800; text-align: center; text-transform: uppercase; }
