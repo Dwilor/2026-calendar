@@ -19,36 +19,82 @@ MOODS_CFG.forEach(m => { if(m.c !== 'transparent') starPos[m.c] = {t:Math.random
 
 function updateStars() {
     const cont = document.getElementById("star-container");
-    const view = stack[stack.length-1];
+    const view = stack[stack.length - 1]; // Récupère la vue actuelle (ex: 'year', 'months', 'month', 'day')
+    const counts = {};
+    
+    // 1. CONDITION HOME-PAGE : Si on est sur l'écran du titre "2026", on cache tout
     if (view === 'year') {
-        cont.querySelectorAll('.mood-star').forEach(s => s.style.opacity = "0");
+        cont.querySelectorAll('.mood-star').forEach(s => {
+            s.style.opacity = "0";
+            s.style.visibility = "hidden";
+        });
         return;
     }
-    const counts = {};
+
+    // 2. CALCUL DES DONNÉES SELON LA VUE
     Object.keys(MOODS).forEach(key => {
         const color = MOODS[key];
-        if(color && color !== 'transparent') {
-            if(view === 'months' || key.startsWith(`${YEAR}-${curM}-`)) counts[color] = (counts[color]||0) + 1;
+        if (!color || color === 'transparent') return;
+
+        let shouldCount = false;
+        if (view === 'months') {
+            // C'est votre page "Année" (Grille des 12 mois) -> On compte tout
+            shouldCount = key.startsWith(`${YEAR}-`);
+        } else if (view === 'month') {
+            // Page d'un mois précis -> On compte le mois curM
+            shouldCount = key.startsWith(`${YEAR}-${curM}-`);
+        } else if (view === 'day') {
+            // Page d'un jour précis
+            shouldCount = (key === `${YEAR}-${curM}-${curD}`);
         }
+
+        if (shouldCount) counts[color] = (counts[color] || 0) + 1;
     });
+
+    // 3. APPLICATION DES RÈGLES D'INTENSITÉ
     MOODS_CFG.forEach(cfg => {
-        if(cfg.c === 'transparent') return;
+        if (cfg.c === 'transparent') return;
         let s = cont.querySelector(`[data-col="${cfg.c}"]`);
-        if(!s) {
-            s = document.createElement("div"); s.className="mood-star"; s.dataset.col=cfg.c; 
-            s.style.backgroundColor=cfg.c; s.style.top = starPos[cfg.c].t+"%"; s.style.left = starPos[cfg.c].l+"%";
+        
+        if (!s) {
+            s = document.createElement("div"); 
+            s.className = "mood-star"; 
+            s.dataset.col = cfg.c; 
+            s.style.backgroundColor = cfg.c; 
+            s.style.top = starPos[cfg.c].t + "%"; 
+            s.style.left = starPos[cfg.c].l + "%";
             cont.appendChild(s);
         }
+        
         const n = counts[cfg.c] || 0;
-        if(n > 0) {
-            const isOverview = (view === 'months');
-            const baseSize = isOverview ? 180 : 150;
-            const size = Math.min(450, baseSize + (n * (isOverview ? 8 : 15)));
-            s.style.width = size+"px"; s.style.height = size+"px";
-            s.style.opacity = Math.min(isOverview ? 0.45 : 0.7, 0.25 + (n * 0.01));
-            s.style.boxShadow = `0 0 ${40 + n * 4}px ${cfg.c}`;
+        
+        if (n > 0) {
+            let intensity = 0;
+            let scale = 1;
+
+            if (view === 'day') {
+                intensity = 1; 
+                scale = 1.4;
+            } else if (view === 'month') {
+                intensity = n * 0.1; // 10 jours = 1
+                scale = 1 + (n * 0.04); 
+            } else if (view === 'months') {
+                intensity = n * 0.01; // 100 jours = 1
+                scale = 1 + (n * 0.008);
+            }
+
+            const finalOpacity = Math.min(0.7, intensity * 0.6);
+            const baseSize = 250;
+            
             s.style.visibility = "visible";
-        } else { s.style.opacity = "0"; s.style.visibility = "hidden"; }
+            s.style.width = (baseSize * scale) + "px"; 
+            s.style.height = (baseSize * scale) + "px";
+            s.style.opacity = finalOpacity;
+            s.style.boxShadow = `0 0 ${40 + (intensity * 40)}px ${cfg.c}`;
+        } else { 
+            s.style.opacity = "0"; 
+            s.style.visibility = "hidden"; 
+        }
     });
 }
 
@@ -202,4 +248,21 @@ function importData() {
     };
     input.click();
 }
+
+// Gestion du Swipe vers la droite pour retour
+let touchStartX = 0;
+document.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+}, {passive: true});
+
+document.addEventListener('touchend', e => {
+    const touchEndX = e.changedTouches[0].screenX;
+    // Si glissement de plus de 100px vers la droite
+    if (touchEndX - touchStartX > 100) {
+        if (stack.length > 1 && !document.querySelector('.modal.active')) {
+            back();
+        }
+    }
+}, {passive: true});
+
 updateUI();
