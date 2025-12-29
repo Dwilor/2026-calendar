@@ -5,7 +5,6 @@ const MOODS_CFG = [{c:'transparent'},{c:'#800020'},{c:'#F21B6A'},{c:'#9D50BB'},{
 
 let TASKS, MOODS, CATS, selectedCat = 0, stack = ["year"], curM, curD, starPos = {};
 
-// Initialisation
 try {
     TASKS = JSON.parse(localStorage.getItem(KEY+"-t")||"{}");
     MOODS = JSON.parse(localStorage.getItem(KEY+"-m")||"{}");
@@ -18,17 +17,6 @@ try {
 
 MOODS_CFG.forEach(m => { if(m.c !== 'transparent') starPos[m.c] = {t:Math.random()*60+20, l:Math.random()*60+20}; });
 
-// --- Swipe Back Tactile ---
-let touchStartX = 0;
-document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, false);
-document.addEventListener('touchend', e => {
-    let touchEndX = e.changedTouches[0].screenX;
-    if (!document.querySelector('.modal.active') && touchEndX - touchStartX > 100 && stack.length > 1) {
-        back();
-    }
-}, false);
-
-// --- Core Logic ---
 function updateStars() {
     const cont = document.getElementById("star-container");
     const view = stack[stack.length-1];
@@ -69,11 +57,9 @@ function updateUI() {
     const bBtn = document.getElementById("backBtn");
     const addBtn = document.getElementById("addTaskBtn");
     const setBtn = document.getElementById("settingsBtn");
-
     bBtn.classList.toggle("visible", cur !== "year");
     addBtn.classList.toggle("visible", cur === "day");
     setBtn.classList.toggle("visible", cur === "months" || cur === "month");
-    
     if(cur==="months") bBtn.textContent="‹ " + YEAR;
     else if(cur==="month") bBtn.textContent="‹ Mois";
     else if(cur==="day") bBtn.textContent="‹ " + monthNames[curM];
@@ -82,7 +68,7 @@ function updateUI() {
 
 function nav(to, build) {
     if(build) build();
-    document.getElementById("view-"+stack[stack.length-1]).classList.replace("active", "zoom-out");
+    document.getElementById("view-"+stack[stack.length-1]).classList.remove("active");
     document.getElementById("view-"+to).classList.add("active");
     stack.push(to); updateUI();
 }
@@ -91,11 +77,10 @@ function back() {
     if (stack.length <= 1) return;
     const from = stack.pop();
     document.getElementById("view-"+from).classList.remove("active");
-    document.getElementById("view-"+stack[stack.length-1]).classList.replace("zoom-out", "active");
+    document.getElementById("view-"+stack[stack.length-1]).classList.add("active");
     updateUI();
 }
 
-// --- View Builders ---
 function buildMonths() {
     const g = document.getElementById("monthsGrid"); g.innerHTML = "";
     monthNames.forEach((m,i) => {
@@ -127,27 +112,19 @@ function buildMonth() {
 
 function buildDay() {
     document.getElementById("day-header").textContent = curD + " " + monthNames[curM];
-    const ms = document.getElementById("moodSelector"); 
-    ms.innerHTML = "";
-    
-    // On s'assure que le conteneur est totalement "perméable" visuellement
+    const ms = document.getElementById("moodSelector"); ms.innerHTML = "";
     ms.style.overflow = "visible"; 
-    ms.style.webkitMaskImage = "none"; // Sécurité pour Safari mobile
-
+    ms.style.webkitMaskImage = "none"; 
     MOODS_CFG.forEach(m => {
         const b = document.createElement("span");
         b.className = `mood-btn ${m.c==='transparent'?'off':''} ${MOODS[`${YEAR}-${curM}-${curD}`]===m.c?'active':''}`;
-        b.style.backgroundColor = m.c; // Utilisation de backgroundColor pour plus de stabilité
-        
+        b.style.backgroundColor = m.c; 
         if(m.c==='transparent') b.textContent="×";
-        
         b.onclick = (e) => { 
-            // Empêche tout autre événement de focus
             e.preventDefault();
             MOODS[`${YEAR}-${curM}-${curD}`] = m.c; 
             localStorage.setItem(KEY+"-m", JSON.stringify(MOODS)); 
-            buildDay(); 
-            updateStars(); 
+            buildDay(); updateStars(); 
         };
         ms.appendChild(b);
     });
@@ -167,7 +144,6 @@ function renderTasks() {
     });
 }
 
-// --- Data & Modals ---
 function openModal(isNew = false) {
     if(isNew) { document.getElementById("modalTaskInput").value = ""; document.getElementById("modalTimeInput").value = "12:00"; }
     document.getElementById("taskModal").classList.add("active");
@@ -180,16 +156,13 @@ function openModal(isNew = false) {
     });
 }
 function closeModal(){ document.getElementById("taskModal").classList.remove("active"); }
-
 function saveNewTask() {
     const txt = document.getElementById("modalTaskInput").value, time = document.getElementById("modalTimeInput").value;
     if(!txt.trim()) return;
     TASKS[`${YEAR}-${curM}-${curD}-${time.replace(':','-')}-${Date.now()}`] = {t:txt, c:selectedCat};
     localStorage.setItem(KEY+"-t", JSON.stringify(TASKS)); renderTasks(); buildMonth(); closeModal();
 }
-
 function delTask(k){ delete TASKS[k]; localStorage.setItem(KEY+"-t", JSON.stringify(TASKS)); renderTasks(); buildMonth(); }
-
 function openSettings() {
     document.getElementById("settingsModal").classList.add("active");
     const l = document.getElementById("catSettingsList"); l.innerHTML = "";
@@ -202,20 +175,16 @@ function openSettings() {
 }
 function closeSettings(){ document.getElementById("settingsModal").classList.remove("active"); }
 function saveCats(){ localStorage.setItem(KEY+"-c", JSON.stringify(CATS)); renderTasks(); }
-
 function getDayCols(m,d) {
     const s = new Set(), p = `${YEAR}-${m}-${d}-`;
     for(let k in TASKS) if(k.startsWith(p)) s.add(CATS[TASKS[k].c].c);
     return Array.from(s);
 }
-
-// --- Import/Export ---
 function exportData() {
     const data = { tasks: TASKS, moods: MOODS, cats: CATS };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `universe_glow_backup.json`; a.click();
 }
-
 function importData() {
     const input = document.createElement("input"); input.type = "file"; input.accept = "application/json";
     input.onchange = e => {
@@ -227,11 +196,10 @@ function importData() {
                 if(d.moods) localStorage.setItem(KEY+"-m", JSON.stringify(d.moods));
                 if(d.cats) localStorage.setItem(KEY+"-c", JSON.stringify(d.cats));
                 location.reload();
-            } catch(err) { alert("Erreur de format."); }
+            } catch(err) { alert("Erreur."); }
         };
         reader.readAsText(e.target.files[0]);
     };
     input.click();
 }
-
 updateUI();
