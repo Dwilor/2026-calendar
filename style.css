@@ -5,6 +5,7 @@
     --input-bg: rgba(255, 255, 255, 0.05);
 }
 
+@keyframes deepSpace { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.05); opacity: 0.5; } }
 @keyframes starFloat { 0% { transform: translate(0, 0) rotate(0deg); } 33% { transform: translate(30px, -20px) rotate(1deg); } 66% { transform: translate(-15px, 30px) rotate(-1deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
 @keyframes gradientText { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 @keyframes slideUp { from { opacity: 0; transform: translate(-50%, 30px); } to { opacity: 1; transform: translate(-50%, 0); } }
@@ -12,17 +13,8 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent !important; outline: none !important; }
 html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); font-family: -apple-system, system-ui, sans-serif; overflow: hidden; position: fixed; color: white; overscroll-behavior: none; }
 
-.space-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: #000; }
-
-.grain { 
-    position: absolute; 
-    inset: 0; 
-    filter: url(#noise); 
-    opacity: 0.14; /* Grain plus présent */
-    mix-blend-mode: overlay; 
-    pointer-events: none; 
-}
-
+.space-bg { position: fixed; inset: -20%; z-index: 0; pointer-events: none; }
+.nebula { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(40, 50, 120, 0.2) 0%, transparent 70%); filter: blur(80px); animation: deepSpace 20s infinite; }
 #star-container { position: absolute; inset: -15%; z-index: 1; pointer-events: none; }
 
 .mood-star { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0; transition: all 1.8s cubic-bezier(0.4, 0, 0.2, 1); animation: starFloat 60s infinite ease-in-out; mix-blend-mode: screen; pointer-events: none; will-change: transform, width, height, opacity; }
@@ -30,14 +22,18 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: var(-
 #stage { position: relative; width: 100vw; height: 100vh; z-index: 10; pointer-events: none; }
 .layer { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; visibility: hidden; pointer-events: none; transform: scale(0.95); filter: blur(10px); transition: all 0.6s cubic-bezier(0.2, 0, 0.2, 1); overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px; padding-top: calc(60px + env(safe-area-inset-top)); padding-bottom: 120px; }
 .layer.active { opacity: 1; visibility: visible; pointer-events: auto; transform: scale(1); filter: blur(0px); }
+.full-w-flex { width: 100%; display: flex; flex-direction: column; align-items: center; }
 
 .header-main { font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #00D2FF, #9D50BB, #F21B6A); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: gradientText 8s ease infinite; width: 100%; }
 .year-big { font-size: 26vw; font-weight: 900; cursor: pointer; text-align: center; margin: 0; width: 100%; pointer-events: auto; background: linear-gradient(135deg, #00D2FF, #9D50BB, #F21B6A); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: gradientText 8s ease infinite; }
 
-/* Grille des mois optimisée */
-.months-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 10px; width: 100%; max-width: 500px; }
+.months-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px 10px; width: 100%; max-width: 500px; }
 .month-item { text-align: center; font-size: 1.3rem; font-weight: 500; cursor: pointer; padding: 15px 0; }
-@media (max-width: 600px) { .months-grid { grid-template-columns: repeat(2, 1fr); } }
+
+@media (max-width: 600px) { 
+    .months-grid { grid-template-columns: repeat(2, 1fr); gap: 12px 10px; } 
+    .month-item { padding: 8px 0; font-size: 1.15rem; } 
+}
 
 .month-view-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; width: 100%; max-width: 500px; }
 .weekday { font-size: 0.7rem; color: rgba(255,255,255,0.3); font-weight: 800; text-align: center; text-transform: uppercase; }
@@ -46,10 +42,60 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: var(-
 .dots { display: flex; gap: 3px; justify-content: center; margin-top: 6px; height: 5px; }
 .dot { width: 5px; height: 5px; border-radius: 50%; }
 
-.mood-selector { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 30px; position: relative; padding: 30px 0; width: 100%; }
-.mood-btn { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; transition: 0.4s; filter: blur(10px); opacity: 0.4; border: none; }
-.mood-btn.active { transform: scale(1.4); filter: blur(8px); opacity: 1; border: 2px solid white !important; }
-.mood-btn.off { filter: none; opacity: 0.4; border: 1px solid rgba(255,255,255,0.2); background: transparent !important; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; }
+.mood-selector { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 15px; 
+    margin-bottom: 30px; 
+    position: relative;
+    /* On donne de l'air en haut et en bas pour le flou */
+    padding: 30px 0; 
+    /* On interdit au navigateur de couper ce qui dépasse */
+    overflow: visible !important; 
+    width: 100%;
+}
+
+.mood-btn { 
+    width: 34px; 
+    height: 34px; 
+    border-radius: 50%; 
+    cursor: pointer; 
+    transition: transform 0.4s ease, opacity 0.4s ease, filter 0.4s ease; 
+    filter: blur(10px); 
+    opacity: 0.4; 
+    border: none; 
+    -webkit-tap-highlight-color: transparent; 
+    user-select: none;
+    
+    /* CORRECTIF RADICAL : */
+    /* 1. On dit au navigateur de préparer un calque plus large */
+    will-change: transform, filter; 
+    /* 2. On force le rendu en 3D pour éviter les artefacts de découpe */
+    transform: translateZ(0); 
+    /* 3. On empêche tout masquage par un parent */
+    backface-visibility: hidden;
+}
+
+.mood-btn.active { 
+    /* On utilise translateZ ici aussi pour garder l'accélération */
+    transform: scale(1.4) translateZ(0); 
+    filter: blur(8px); 
+    opacity: 1; 
+    border: 2px solid white !important; 
+}
+
+.mood-btn.off {
+    filter: none;
+    opacity: 0.4;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: transparent !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: white;
+}
 
 .task-list { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 10px; margin-top: 45px; }
 .task-row { display: grid; grid-template-columns: 80px 1fr 30px; align-items: center; background: rgba(255,255,255,0.06); padding: 16px; border-radius: 20px; }
@@ -59,10 +105,10 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: var(-
 .task-cat-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 12px; }
 .task-del { color: #ff453a; font-size: 20px; opacity: 0.3; cursor: pointer; text-align: right; }
 
-.bottom-bar { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: white; color: black; padding: 16px 35px; border-radius: 35px; font-weight: 700; font-size: 15px; cursor: pointer; z-index: 2000; display: none; white-space: nowrap; }
+.bottom-bar { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: white; color: black; padding: 16px 35px; border-radius: 35px; font-weight: 700; font-size: 15px; cursor: pointer; z-index: 2000; box-shadow: 0 10px 40px rgba(0,0,0,0.6); display: none; white-space: nowrap; }
 .bottom-bar.visible { display: block; animation: slideUp 0.5s cubic-bezier(0.2, 0, 0.2, 1); }
 
-.back { position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 20px; z-index: 5000; padding: 12px 20px; background: rgba(30,30,30,0.5); backdrop-filter: blur(20px); border-radius: 20px; visibility: hidden; opacity: 0; transition: 0.4s; font-weight: 600; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
+.back { position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 20px; z-index: 5000; padding: 12px 20px; background: rgba(30,30,30,0.5); backdrop-filter: blur(20px); border-radius: 20px; visibility: hidden; opacity: 0; transition: 0.4s; font-weight: 600; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; pointer-events: auto; }
 .back.visible { visibility: visible; opacity: 1; }
 
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); display: none; align-items: center; justify-content: center; z-index: 10000; padding: 20px; }
@@ -74,7 +120,8 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: var(-
 .time-picker { background: var(--input-bg); border: none; color: white; padding: 8px; border-radius: 10px; font-family: inherit; }
 .cat-grid { display: flex; justify-content: space-between; margin-bottom: 25px; }
 .modal-actions { display: flex; gap: 10px; }
+.settings-actions { display: flex; gap: 10px; margin-top: 20px; }
+
 .btn-primary { flex: 1; padding: 15px; border-radius: 15px; border: none; background: var(--accent); color: white; font-weight: 700; cursor: pointer; }
 .btn-secondary { flex: 1; padding: 15px; border-radius: 15px; border: none; background: var(--input-bg); color: white; font-weight: 700; cursor: pointer; }
 .full-w { width: 100%; }
-.full-w-flex { width: 100%; display: flex; flex-direction: column; align-items: center; }
