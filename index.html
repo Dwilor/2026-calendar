@@ -24,6 +24,13 @@
     <div id="star-container"></div>
     
     <div class="back" id="backBtn" onclick="back()"></div>
+	
+	<div class="theme-switch-float" id="themeToggle">
+		<div class="toggle">
+			<div class="knob"></div>
+		</div>
+	</div>
+
 
     <div id="stage">
         <div class="layer active" id="view-year">
@@ -68,11 +75,15 @@
     <div class="modal" id="settingsModal">
         <div class="modal-card">
             <div class="modal-title">Réglages</div>
+
             <div id="catSettingsList"></div>
+
             <div class="settings-actions">
-                <button onclick="exportData()" class="btn-secondary" style="font-size: 11px;">Exporter JSON</button>
-                <button onclick="importData()" class="btn-secondary" style="font-size: 11px;">Importer JSON</button>
-            </div>
+    <button onclick="exportData()" class="btn-secondary">Exporter données</button>
+    <button onclick="importData()" class="btn-secondary">Importer données</button>
+</div>
+
+
             <button onclick="closeSettings()" class="btn-secondary full-w" style="margin-top: 15px; background: rgba(255,255,255,0.15);">Fermer</button>
         </div>
     </div>
