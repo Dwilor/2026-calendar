@@ -158,24 +158,39 @@ function buildMonth() {
 
 function buildDay() {
     document.getElementById("day-header").textContent = curD + " " + monthNames[curM];
-    const ms = document.getElementById("moodSelector"); ms.innerHTML = "";
-    ms.style.overflow = "visible"; 
-    ms.style.webkitMaskImage = "none"; 
-    MOODS_CFG.forEach(m => {
-        const b = document.createElement("span");
-        b.className = `mood-btn ${m.c==='transparent'?'off':''} ${MOODS[`${YEAR}-${curM}-${curD}`]===m.c?'active':''}`;
-        b.style.backgroundColor = m.c; 
-        if(m.c==='transparent') b.textContent="×";
-        b.onclick = (e) => { 
-            e.preventDefault();
-            MOODS[`${YEAR}-${curM}-${curD}`] = m.c; 
-            localStorage.setItem(KEY+"-m", JSON.stringify(MOODS)); 
-            buildDay(); updateStars(); 
-        };
-        ms.appendChild(b);
-    });
+    const ms = document.getElementById("moodSelector");
+
+    // ⛔ Ne plus recréer si déjà présent
+    if (ms.children.length === 0) {
+        MOODS_CFG.forEach(m => {
+            const b = document.createElement("span");
+            b.className = `mood-btn ${m.c === 'transparent' ? 'off' : ''}`;
+            b.style.backgroundColor = m.c;
+			b.dataset.color = m.c; // ✅ source de vérité
+            if (m.c === 'transparent') b.textContent = "×";
+
+            b.onclick = () => {
+                MOODS[`${YEAR}-${curM}-${curD}`] = m.c;
+                localStorage.setItem(KEY + "-m", JSON.stringify(MOODS));
+                updateMoodButtons();   // ✅ transition fluide
+                updateStars();
+            };
+
+            ms.appendChild(b);
+        });
+    }
+
+    updateMoodButtons();
     renderTasks();
 }
+
+function updateMoodButtons() {
+    const current = MOODS[`${YEAR}-${curM}-${curD}`];
+    document.querySelectorAll(".mood-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.color === current);
+    });
+}
+
 
 function renderTasks() {
     const c = document.getElementById("taskContainer"); c.innerHTML = "";
