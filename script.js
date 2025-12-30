@@ -2,6 +2,16 @@ const YEAR = 2026;
 const monthNames = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 const KEY = "universe-glow-v28"; 
 const MOODS_CFG = [{c:'transparent'},{c:'#800020'},{c:'#F21B6A'},{c:'#9D50BB'},{c:'#007AFF'},{c:'#00D2FF'}];
+const LABEL_COLORS = [
+    "#007AFF", // bleu
+    "#00D2FF", // cyan
+    "#34C759", // vert menthe (Apple-like)
+    "#9D50BB", // violet
+    "#F21B6A", // rose
+    "#FF9F0A", // orange chaud
+    "#800020"  // bordeaux
+];
+
 
 let TASKS, MOODS, CATS, selectedCat = 0, stack = ["year"], curM, curD, starPos = {};
 
@@ -226,14 +236,100 @@ function saveNewTask() {
 function delTask(k){ delete TASKS[k]; localStorage.setItem(KEY+"-t", JSON.stringify(TASKS)); renderTasks(); buildMonth(); }
 function openSettings() {
     document.getElementById("settingsModal").classList.add("active");
-    const l = document.getElementById("catSettingsList"); l.innerHTML = "";
-    CATS.forEach((cat,i)=>{
-        const r = document.createElement("div"); r.style.cssText="display:grid;grid-template-columns:35px 1fr;gap:15px;margin-bottom:12px;align-items:center";
-        r.innerHTML = `<input type="color" style="width:30px;height:30px;border:none;background:none" value="${cat.c}" onchange="CATS[${i}].c=this.value;saveCats()">
-                       <input type="text" class="custom-input" style="margin-bottom:0" value="${cat.n}" oninput="CATS[${i}].n=this.value;saveCats()">`;
+    renderCatSettings();
+}
+
+function getAvailableLabelColors(exceptIndex = null) {
+    const used = CATS
+        .filter((_, i) => i !== exceptIndex)
+        .map(c => c.c);
+
+    return LABEL_COLORS.filter(c => !used.includes(c));
+}
+
+
+
+function renderCatSettings() {
+    const l = document.getElementById("catSettingsList");
+    l.innerHTML = "";
+
+    CATS.forEach((cat, i) => {
+        const r = document.createElement("div");
+        r.className = "cat-row";
+
+        // pastille couleur
+        const col = document.createElement("div");
+        col.className = "cat-color";
+        col.style.background = cat.c;
+        col.onclick = () => cycleCatColor(i);
+
+        // input texte
+        const input = document.createElement("input");
+        input.className = "custom-input";
+        input.style.marginBottom = "0";
+        input.value = cat.n;
+        input.oninput = e => {
+            CATS[i].n = e.target.value;
+            saveCats();
+            renderTasks();
+        };
+
+        // supprimer
+        const del = document.createElement("div");
+        del.className = "cat-remove";
+        del.textContent = "×";
+        del.onclick = () => removeCat(i);
+
+        r.append(col, input, del);
         l.appendChild(r);
     });
+
+    // bouton ajouter
+const available = getAvailableLabelColors();
+
+if (available.length > 0) {
+    const add = document.createElement("div");
+    add.className = "add-cat";
+    add.textContent = "+ Ajouter un libellé";
+    add.onclick = addCat;
+    l.appendChild(add);
 }
+
+}
+
+function cycleCatColor(i) {
+    const colors = getAvailableLabelColors(i);
+    const cur = CATS[i].c;
+    const idx = colors.indexOf(cur);
+    CATS[i].c = colors[(idx + 1) % colors.length];
+    saveCats();
+    renderCatSettings();
+    renderTasks();
+}
+
+
+function addCat() {
+    const colors = getAvailableLabelColors();
+    if (!colors.length) return;
+
+    CATS.push({
+        n: "Nouveau",
+        c: colors[0]
+    });
+    saveCats();
+    renderCatSettings();
+}
+
+
+
+function removeCat(i) {
+    if (CATS.length <= 1) return;
+    CATS.splice(i, 1);
+    saveCats();
+    renderCatSettings();
+    renderTasks();
+}
+
 function closeSettings(){ document.getElementById("settingsModal").classList.remove("active"); }
 function saveCats(){ localStorage.setItem(KEY+"-c", JSON.stringify(CATS)); renderTasks(); }
 function getDayCols(m,d) {
@@ -279,5 +375,23 @@ document.addEventListener('touchend', e => {
         }
     }
 }, {passive: true});
+
+const THEME_KEY = KEY + "-theme";
+
+function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem(THEME_KEY, theme);
+}
+
+function toggleTheme() {
+    const current = document.documentElement.dataset.theme || "dark";
+    applyTheme(current === "dark" ? "light" : "dark");
+}
+
+// Init theme
+applyTheme(localStorage.getItem(THEME_KEY) || "dark");
+
+document.getElementById("themeToggle")?.addEventListener("click", toggleTheme);
+
 
 updateUI();
