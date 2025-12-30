@@ -25,7 +25,50 @@ try {
     TASKS={}; MOODS={}; CATS=[{c:"#00D2FF", n:"Projet"},{c:"#9D50BB", n:"Perso"},{c:"#F21B6A", n:"Urgent"}]; 
 }
 
-MOODS_CFG.forEach(m => { if(m.c !== 'transparent') starPos[m.c] = {t:Math.random()*60+20, l:Math.random()*60+20}; });
+const STAR_SAFE_ZONE = {
+    top: 35,
+    bottom: 65,
+    left: 30,
+    right: 70
+};
+
+function generateStarPosition(existing) {
+    let attempts = 0;
+
+    while (attempts < 40) {
+        const t = Math.random() * 80 + 10;
+        const l = Math.random() * 80 + 10;
+
+        const inCenter =
+            t > STAR_SAFE_ZONE.top &&
+            t < STAR_SAFE_ZONE.bottom &&
+            l > STAR_SAFE_ZONE.left &&
+            l < STAR_SAFE_ZONE.right;
+
+        if (inCenter) {
+            attempts++;
+            continue;
+        }
+
+        const tooClose = Object.values(existing).some(p => {
+            const dx = p.l - l;
+            const dy = p.t - t;
+            return Math.sqrt(dx * dx + dy * dy) < 22;
+        });
+
+        if (!tooClose) return { t, l };
+
+        attempts++;
+    }
+
+    return { t: Math.random()*80+10, l: Math.random()*80+10 };
+}
+
+MOODS_CFG.forEach(m => {
+    if (m.c !== 'transparent') {
+        starPos[m.c] = generateStarPosition(starPos);
+    }
+});
 
 function updateStars() {
     const cont = document.getElementById("star-container");
@@ -201,18 +244,51 @@ function updateMoodButtons() {
     });
 }
 
-
 function renderTasks() {
-    const c = document.getElementById("taskContainer"); c.innerHTML = "";
+    const c = document.getElementById("taskContainer");
+    c.innerHTML = "";
     const pre = `${YEAR}-${curM}-${curD}-`;
-    Object.keys(TASKS).filter(k=>k.startsWith(pre)).sort().forEach(k=>{
-        const t = TASKS[k], r = document.createElement("div"); r.className="task-row";
-        const p = k.split('-');
-        r.innerHTML = `<div class="task-info"><div class="task-time">${p[3]}:${p[4]}</div><div class="task-label-tag">${CATS[t.c].n}</div></div>
-            <div style="display:flex;align-items:center;overflow:hidden"><div class="task-cat-dot" style="background:${CATS[t.c].c}"></div><div style="font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.t}</div></div>
-            <div class="task-del" onclick="delTask('${k}')">×</div>`;
-        c.appendChild(r);
-    });
+
+    Object.keys(TASKS)
+        .filter(k => k.startsWith(pre))
+        .sort()
+        .forEach(k => {
+            const t = TASKS[k];
+            const p = k.split('-');
+
+            const r = document.createElement("div");
+            r.className = "task-row";
+            if (t.done) r.classList.add("done");
+
+            r.style.setProperty("--task-glow", CATS[t.c].c + "88");
+
+            r.onclick = () => {
+                if (t.done || r.classList.contains("validating")) return;
+
+                r.classList.add("validating");
+                pulseStar(CATS[t.c].c);
+
+                setTimeout(() => {
+                    toggleTaskDone(k);
+                }, 2200);
+            };
+
+            r.innerHTML = `
+                <div class="task-info">
+                    <div class="task-time">${p[3]}:${p[4]}</div>
+                    <div class="task-label-tag">${CATS[t.c].n}</div>
+                </div>
+                <div style="display:flex;align-items:center;overflow:hidden">
+                    <div class="task-cat-dot" style="background:${CATS[t.c].c}"></div>
+                    <div style="font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                        ${t.t}
+                    </div>
+                </div>
+                <div class="task-del" onclick="event.stopPropagation(); delTask('${k}')">×</div>
+            `;
+
+            c.appendChild(r);
+        });
 }
 
 function openModal(isNew = false) {
@@ -227,13 +303,29 @@ function openModal(isNew = false) {
     });
 }
 function closeModal(){ document.getElementById("taskModal").classList.remove("active"); }
+
 function saveNewTask() {
-    const txt = document.getElementById("modalTaskInput").value, time = document.getElementById("modalTimeInput").value;
-    if(!txt.trim()) return;
-    TASKS[`${YEAR}-${curM}-${curD}-${time.replace(':','-')}-${Date.now()}`] = {t:txt, c:selectedCat};
-    localStorage.setItem(KEY+"-t", JSON.stringify(TASKS)); renderTasks(); buildMonth(); closeModal();
+    const txt = document.getElementById("modalTaskInput").value;
+    const time = document.getElementById("modalTimeInput").value;
+    if (!txt.trim()) return;
+
+    const key = `${YEAR}-${curM}-${curD}-${time.replace(":", "-")}-${Date.now()}`;
+
+    TASKS[key] = {
+        t: txt,
+        c: selectedCat,
+        h: time,
+        done: false
+    };
+
+    localStorage.setItem(KEY + "-t", JSON.stringify(TASKS));
+    renderTasks();
+    buildMonth();
+    closeModal();
 }
+
 function delTask(k){ delete TASKS[k]; localStorage.setItem(KEY+"-t", JSON.stringify(TASKS)); renderTasks(); buildMonth(); }
+
 function openSettings() {
     document.getElementById("settingsModal").classList.add("active");
     renderCatSettings();
@@ -320,21 +412,38 @@ function addCat() {
     renderCatSettings();
 }
 
-
-
 function removeCat(i) {
-    if (CATS.length <= 1) return;
+    const used = Object.keys(TASKS).some(k => TASKS[k].c === i);
+
+    if (used) {
+        const ok = confirm(
+            "Attention : supprimer ce libellé supprimera aussi toutes les tâches associées. Continuer ?"
+        );
+        if (!ok) return;
+    }
+
+    Object.keys(TASKS).forEach(k => {
+        if (TASKS[k].c === i) delete TASKS[k];
+        else if (TASKS[k].c > i) TASKS[k].c--;
+    });
+
     CATS.splice(i, 1);
     saveCats();
+    localStorage.setItem(KEY+"-t", JSON.stringify(TASKS));
     renderCatSettings();
     renderTasks();
+    buildMonth();
 }
 
 function closeSettings(){ document.getElementById("settingsModal").classList.remove("active"); }
 function saveCats(){ localStorage.setItem(KEY+"-c", JSON.stringify(CATS)); renderTasks(); }
 function getDayCols(m,d) {
     const s = new Set(), p = `${YEAR}-${m}-${d}-`;
-    for(let k in TASKS) if(k.startsWith(p)) s.add(CATS[TASKS[k].c].c);
+for (let k in TASKS) {
+    if (!k.startsWith(p)) continue;
+    if (TASKS[k].done) continue;
+    s.add(CATS[TASKS[k].c].c);
+}
     return Array.from(s);
 }
 function exportData() {
@@ -393,5 +502,27 @@ applyTheme(localStorage.getItem(THEME_KEY) || "dark");
 
 document.getElementById("themeToggle")?.addEventListener("click", toggleTheme);
 
+function resetAll() {
+    if (!confirm("Tout réinitialiser ?")) return;
+    localStorage.clear();
+    location.reload();
+}
 
 updateUI();
+
+function toggleTaskDone(key) {
+    TASKS[key].done = true;
+    if (navigator.vibrate) navigator.vibrate(15);
+    localStorage.setItem(KEY + "-t", JSON.stringify(TASKS));
+    renderTasks();
+    buildMonth();
+}
+
+function pulseStar(color) {
+    const stars = document.querySelectorAll(".mood-star");
+    const s = [...stars].find(st => st.dataset.col === color);
+    if (!s) return;
+
+    s.classList.add("pulse");
+    setTimeout(() => s.classList.remove("pulse"), 900);
+}
