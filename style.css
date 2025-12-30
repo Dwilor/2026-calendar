@@ -23,8 +23,6 @@
     --border: rgba(0,0,0,0.12);
 }
 
-
-
 @keyframes starFloat { 0% { transform: translate(0, 0) rotate(0deg); } 33% { transform: translate(30px, -20px) rotate(1deg); } 66% { transform: translate(-15px, 30px) rotate(-1deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
 @keyframes gradientText { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 @keyframes slideUp { from { opacity: 0; transform: translate(-50%, 30px); } to { opacity: 1; transform: translate(-50%, 0); } }
@@ -69,7 +67,7 @@ html, body {
 
 #star-container { position: absolute; inset: -15%; z-index: 1; pointer-events: none; }
 
-.mood-star { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0; transition: all 1.8s cubic-bezier(0.4, 0, 0.2, 1); animation: starFloat 60s infinite ease-in-out; mix-blend-mode: screen; pointer-events: none; will-change: transform, width, height, opacity, box-shadow; }
+.mood-star { position: absolute; border-radius: 50%; filter: blur(50px); opacity: 0.35; transition: all 1.8s cubic-bezier(0.4, 0, 0.2, 1); animation: starFloat 60s infinite ease-in-out; mix-blend-mode: screen; pointer-events: none; will-change: transform, width, height, opacity, box-shadow; }
 
 .mood-star::after {
     content: "";
@@ -89,7 +87,7 @@ html, body {
 .header-main { font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #00D2FF, #9D50BB, #F21B6A); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: gradientText 8s ease infinite; width: 100%; }
 .year-big { font-size: 26vw; font-weight: 900; cursor: pointer; text-align: center; margin: 0; width: 100%; pointer-events: auto; background: linear-gradient(135deg, #00D2FF, #9D50BB, #F21B6A); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: gradientText 8s ease infinite; }
 
-.months-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px 10px; width: 100%; max-width: 500px; }
+.months-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px 10px; width: 100%; max-width: 500px; margin-top: 0;}
 .month-item { text-align: center; font-size: 1.3rem; font-weight: 500; cursor: pointer; padding: 15px 0; }
 @media (max-width: 600px) { 
     .months-grid { 
@@ -105,7 +103,7 @@ html, body {
 .dots { display: flex; gap: 3px; justify-content: center; margin-top: 6px; height: 5px; }
 .dot { width: 5px; height: 5px; border-radius: 50%; }
 
-.mood-selector { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 30px; position: relative; padding: 30px 0; overflow: visible !important; width: 100%; }
+.mood-selector { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 5px; margin-top: 0; position: relative; padding: 30px 0; overflow: visible !important; width: 100%; }
 .mood-btn {
   width: 34px;
   height: 34px;
@@ -114,7 +112,7 @@ html, body {
   border: none;
 
   opacity: 0.35;
-  filter: blur(10px) brightness(0.85) saturate(0.6);
+  filter: blur(10px) brightness(0.85) saturate(1);
   transform: scale(1) translateZ(0);
 
   will-change: transform, filter, opacity;
@@ -173,7 +171,13 @@ html, body {
 .custom-input { width: 100%; background: var(--input-bg); border: none; border-radius: 15px; padding: 15px; color: white; margin-bottom: 20px; outline: none; font-size: 1rem; }
 .time-row { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; font-size: 13px; opacity: 0.8; }
 .time-picker { background: var(--input-bg); border: none; color: white; padding: 8px; border-radius: 10px; font-family: inherit; }
-.cat-grid { display: flex; justify-content: space-between; margin-bottom: 25px; }
+.cat-grid {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 25px;
+}
 .modal-actions { display: flex; gap: 10px; }
 .btn-primary { flex: 1; padding: 15px; border-radius: 15px; border: none; background: var(--accent); color: white; font-weight: 700; cursor: pointer; }
 .btn-secondary { flex: 1; padding: 15px; border-radius: 15px; border: none; background: var(--input-bg); color: white; font-weight: 700; cursor: pointer; }
@@ -333,4 +337,184 @@ html, body {
     background: transparent !important;
     border: 1px solid rgba(0,0,0,0.25);
     color: rgba(0,0,0,0.6);
+}
+
+[data-theme="light"] .time-picker {
+    color: rgba(0,0,0,0.85);
+}
+
+[data-theme="light"] .weekday {
+    color: rgba(0,0,0,0.55);
+}
+
+.reset-zone {
+    height: 6px;
+    margin-top: 18px;
+}
+
+@media (min-width: 900px) {
+
+    #view-months .header-main {
+        font-size: 2.8rem;
+    }
+
+    #view-month .header-main {
+        font-size: 2.8rem;
+    }
+
+    #view-day .header-main {
+        font-size: 2.8rem;
+    }
+
+}
+
+.full-w-flex {
+    margin-top: 0;
+}
+
+.header-main {
+    margin-bottom: 28px;
+}
+
+.task-list {
+    padding-bottom: calc(90px + env(safe-area-inset-bottom));
+}
+
+.task-row.done {
+    opacity: 0.45;
+    transform: scale(0.97);
+    transition:
+        opacity 1.4s var(--smooth-ease),
+        transform 1.4s var(--smooth-ease);
+}
+
+.task-row.done .task-cat-dot,
+.task-row.done .task-label-tag {
+    opacity: 0;
+}
+
+.task-row {
+    position: relative;
+}
+
+.task-row.validating::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: taskSweep 0.35s ease;
+    pointer-events: none;
+}
+
+.task-row:not(.done):hover {
+    transform: scale(1.015);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+@media (hover: none) {
+    .task-row:not(.done):active {
+        transform: scale(1.015);
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.08);
+    }
+}
+
+@keyframes taskSweep {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+}
+
+.task-row::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    border: 1px solid transparent;
+    transition:
+        border-color 0.6s var(--smooth-ease),
+        box-shadow 0.6s var(--smooth-ease);
+    pointer-events: none;
+}
+
+.task-row:not(.done):hover::before {
+    border-color: rgba(255,255,255,0.25);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.12);
+}
+
+@media (hover: none) {
+    .task-row:not(.done):active::before {
+        border-color: rgba(255,255,255,0.25);
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.12);
+    }
+}
+
+/* ===================================================
+   Task validation animation (corrected & unified)
+=================================================== */
+
+@keyframes taskBreath {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+        box-shadow: none;
+    }
+
+    30% {
+        transform: scale(1.045);
+        opacity: 1;
+        box-shadow:
+            0 0 0 1px var(--task-glow),
+            0 0 28px var(--task-glow);
+    }
+
+    65% {
+        transform: scale(1.01);
+        opacity: 0.85;
+        box-shadow:
+            0 0 0 1px var(--task-glow),
+            0 0 14px var(--task-glow);
+    }
+
+    100% {
+        transform: scale(0.97);
+        opacity: 0.45;
+        box-shadow: none;
+    }
+}
+
+.task-row {
+    transition:
+        transform 1.2s var(--smooth-ease),
+        opacity 1.2s var(--smooth-ease),
+        box-shadow 1.2s var(--smooth-ease);
+}
+
+.task-row.validating {
+    animation: taskBreath 2.2s var(--smooth-ease);
+}
+
+/* ===================================================
+   Star pulse (correct selector)
+=================================================== */
+
+.mood-star.pulse {
+    animation: starPulse 1.2s ease;
+}
+
+@keyframes starPulse {
+    0% {
+        opacity: 0.25;
+        transform: scale(1);
+    }
+    40% {
+        opacity: 0.85;
+        transform: scale(1.35);
+    }
+    70% {
+        opacity: 0.55;
+        transform: scale(1.15);
+    }
+    100% {
+        opacity: 0.25;
+        transform: scale(1);
+    }
 }
