@@ -3,6 +3,7 @@
     --accent: #0A84FF;
     --card-bg: #1c1c1e;
     --input-bg: rgba(255, 255, 255, 0.05);
+	--smooth-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes starFloat { 0% { transform: translate(0, 0) rotate(0deg); } 33% { transform: translate(30px, -20px) rotate(1deg); } 66% { transform: translate(-15px, 30px) rotate(-1deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
@@ -63,9 +64,43 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: var(-
 .dot { width: 5px; height: 5px; border-radius: 50%; }
 
 .mood-selector { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 30px; position: relative; padding: 30px 0; overflow: visible !important; width: 100%; }
-.mood-btn { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; transition: transform 0.4s ease, opacity 0.4s ease, filter 0.4s ease; filter: blur(10px); opacity: 0.4; border: none; -webkit-tap-highlight-color: transparent; user-select: none; will-change: transform, filter; transform: translateZ(0); backface-visibility: hidden; }
-.mood-btn.active { transform: scale(1.4) translateZ(0); filter: blur(8px); opacity: 1; border: 2px solid white !important; }
-.mood-btn.off { filter: none; opacity: 0.4; border: 1px solid rgba(255,255,255,0.2); background: transparent !important; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; }
+.mood-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+
+  opacity: 0.35;
+  filter: blur(10px) brightness(0.85) saturate(0.6);
+  transform: scale(1) translateZ(0);
+
+  will-change: transform, filter, opacity;
+  backface-visibility: hidden;
+
+  transition:
+    transform 800ms var(--smooth-ease),
+    filter 800ms var(--smooth-ease),
+    opacity 700ms var(--smooth-ease);
+}
+
+.mood-btn.active {
+  transform: scale(1.2) translateZ(0);
+  opacity: 1;
+  filter: blur(8px) brightness(1.1) saturate(1.2);
+}
+
+.mood-btn.off {
+  filter: none;
+  opacity: 0.4;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: transparent !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: white;
+}
 
 .task-list { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 10px; margin-top: 45px; }
 .task-row { display: grid; grid-template-columns: 80px 1fr 30px; align-items: center; background: rgba(255,255,255,0.06); padding: 16px; border-radius: 20px; }
